@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style type="text/css">
+
+
+		#memory_board{	
+			border: #999 1px solid;
+			width: 400px;
+			height: 289px;
+			padding: 24px;
+			margin: 0px auto;
+			background: url(tausta.jpg) no-repeat top center;
+			background-size: 100%;
+			z-index: 1;
+			/*filter: blur(2px);
+			-webkit-filter: blur(2px);*/
+			
+		}
+		.card {
+			background: url(background.jpg) no-repeat top center;
+			background-size:111px 111px;
+			border: #000 1px solid;
+			width: 71px;
+			height:71px;
+			float:left;
+			margin:10px;
+			padding:20px;
+			font-size:64px;
+			cursor:pointer;
+			text-align:center;
+			z-index: 2;
+			filter: blur(2px);
+
+			
+
+		}
+
+
+	</style>
+	<script type="text/javascript">
+	var memory_array = ['A','A','B','B','C','C'];
+	var memory_values = []; // For storing the memory values
+	var memory_tile_ids = []; // For storing the memory tile ids
+	var tiles_flipped = 0; // Keep track of the flipped tiles
+	var matches = 0;
+
+	//Suffle method
+	Array.prototype.memory_tile_shuffle = function(){
+		var i = this.length, j, temp;
+		while(--i > 0){
+			j = Math.floor(Math.random() * (i+1));
+			temp = this[j];
+			this[j] = this[i];
+			this[i] = temp;
+		}
+	}
+	// Create a new board
+	function newBoard(){
+		tiles_flipped = 0; // Init all the tiles
+		var output = ''; 
+		memory_array.memory_tile_shuffle(); // Shuffle the tiles
+
+		// Loop over all of the cards and add the tiles to output
+		// Each div get id that matches the tile number
+		// Add click-event to every div -> every tile/card will have own memory_array character A, B, C etc... 
+		for(var i = 0; i < memory_array.length; i++){
+			output += '<div class="card" id="tile_'+i+'" onclick="memoryFlipTile(this,\''+memory_array[i]+'\')"></div>';
+		}
+		// Place the output to #memory_board 
+		document.getElementById('memory_board').innerHTML = output;
+	}
+	function memoryFlipTile(tile,val){
+		// Check if tile is empty and memory_values-array smaller than 2 <-- True, if game is starting 
+		if(tile.innerHTML == "" && memory_values.length < 2){
+			tile.style.background = '#FFF'; // background of a tile = white
+			if (tiles_flipped == memory_array.length -2 ){
+				tile.style.background = 'url(troll.jpg) no-repeat top center / 111px 111px';
+			}
+			else {
+				tile.innerHTML = val; // When tile/card is clicked, it gets value taht is memory_array[i]
+			}
+
+			// if memory_values is empty
+			if (memory_values.length == 0){ 
+				memory_values.push(val); // push val to array
+				memory_tile_ids.push(tile.id); // push id to array
+
+			// if memory_values already has a value
+			} else if(memory_values.length == 1){ 
+				memory_values.push(val); // push val to array
+				memory_tile_ids.push(tile.id); // push id to array
+
+				// if both cards match
+				if(memory_values[0] == memory_values[1]) { 
+					tiles_flipped += 2; // set tiles_flipped to 2 
+
+					// Hide both cards
+					var tile_1 = document.getElementById(memory_tile_ids[0]);
+					var tile_2 = document.getElementById(memory_tile_ids[1]);
+					tile_1.style.visibility = 'hidden';
+					tile_2.style.visibility = 'hidden';
+
+					//  Clear both arrays
+					memory_values = [];
+					memory_tile_ids = [];
+					matches = matches + 1;
+					document.getElementById('matchNumber').innerHTML = matches;
+					document.getElementById('memory_board').style.background = 'blur 10px';
+
+
+					// Check to see if the whole board is cleared
+					if (tiles_flipped == memory_array.length){ // if all the tiles are flipped over (all matches have been made)
+						//document.getElementById('memory_board').style.background = 'url(background.jpg) no-repeat';
+						//window.open("http://www.google.fi");
+						alert("Voitit pelin");
+						document.getElementById('memory_board').innerHTML = "";
+						matches = 0;
+						document.requestFullScreen()
+						newBoard();
+					}
+
+				// if no match
+				} else {
+
+					// Flip the 2 tiles back over
+					function flip2Back() {
+						
+						var tile_1 = document.getElementById(memory_tile_ids[0]);
+						var tile_2 = document.getElementById(memory_tile_ids[1]);
+						tile_1.style.background = 'url(background.jpg) no-repeat top center / 111px 111px';
+						tile_1.innerHTML = "";
+						tile_2.style.background = 'url(background.jpg) no-repeat top center / 111px 111px';
+						tile_2.innerHTML = "";
+
+						// Clear both arrays after flip
+						memory_values = [];
+						memory_tile_ids = [];
+					}
+
+					// Flip cards back, time 700ms
+					setTimeout(flip2Back, 700);
+
+				}
+			}
+		}
+	}
+	</script>
+</head>
+<body>
+	<header>
+		<div id="memory_board"></div>
+			<script>newBoard();</script>
+		<div id="matchNumber"></div>
+	</header>
+	</body>
+	</html>
